@@ -54,7 +54,8 @@ export function LandmarkNode({ landmark, onMove, onDrop, onRemove, onLabelSave, 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    onRemove()
+    // button===2 は右クリック。タッチ長押しは button===0 なので無視する
+    if (e.button === 2) onRemove()
   }, [onRemove])
 
   return (
