@@ -40,19 +40,29 @@ export function Canvas({
   const [offset, setOffset] = useState({ x: 0, y: 0 })
   const innerRef = useRef<HTMLDivElement | null>(null)
 
-  // ポインター追跡（パン・ピンチ用）
-  const activePointers = useRef<Map<number, { x: number; y: number }>>(new Map())
-  const pinchInitial = useRef<{ distance: number; scale: number } | null>(null)
-  const panInitial = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null)
-  const suppressNextClick = useRef(false)
-
   // ref は連続イベント間の「現在値」として使う（setState は再レンダー用）
   const scaleRef = useRef(scale)
   const offsetRef = useRef(offset)
   scaleRef.current = scale
   offsetRef.current = offset
 
-  // ズームのコアロジック：anchor 点を固定したままスケール変更
+  // ── ピンチ用：キャプチャフェーズで全ポインターを追跡 ──────────────
+  // キャプチャフェーズは座席の stopPropagation より前に発火するため、
+  // 指が座席上にあっても2本指を検出できる
+  const allPointers = useRef<Map<number, { x: number; y: number }>>(new Map())
+  const isPinchingRef = useRef(false)
+  const pinchInitRef = useRef<{ distance: number; scale: number } | null>(null)
+
+  // ── パン用：背景タッチのみ追跡 ───────────────────────────────────
+  const panInitial = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null)
+  const bgPointerId = useRef<number | null>(null)
+
+  const suppressNextClick = useRef(false)
+
+  const attendeeMap = Object.fromEntries(state.attendees.map((a) => [a.id, a]))
+  const getBounds = useCallback(() => ({ width: WORLD_W, height: WORLD_H }), [])
+
+  // ── ズームのコアロジック ─────────────────────────────────────────
   const applyZoom = useCallback((newScale: number, anchorX: number, anchorY: number) => {
     const clamped = clampScale(newScale)
     const prevScale = scaleRef.current
@@ -61,87 +71,89 @@ export function Canvas({
       x: anchorX - (anchorX - offsetRef.current.x) * (clamped / prevScale),
       y: anchorY - (anchorY - offsetRef.current.y) * (clamped / prevScale),
     }
-    // 再レンダー前に ref を更新することで連続イベントが最新値を参照できる
     scaleRef.current = clamped
     offsetRef.current = newOffset
     setScale(clamped)
     setOffset(newOffset)
   }, [])
 
-  const attendeeMap = Object.fromEntries(state.attendees.map((a) => [a.id, a]))
+  // ── キャプチャフェーズ：ピンチ検出（座席上の指も捕捉） ───────────
+  const handleCaptureDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    allPointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
 
-  const getBounds = useCallback(() => ({ width: WORLD_W, height: WORLD_H }), [])
+    if (allPointers.current.size >= 2 && !isPinchingRef.current) {
+      const pts = Array.from(allPointers.current.values())
+      const dist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y)
+      pinchInitRef.current = { distance: dist, scale: scaleRef.current }
+      isPinchingRef.current = true
+      suppressNextClick.current = true
+      panInitial.current = null
+      // 2本目の指が座席に当たっても座席ドラッグを開始させない
+      e.stopPropagation()
+    }
+  }, [])
 
-  // キャンバス背景へのタッチ開始（パン or ピンチ）
+  const handleCaptureMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!allPointers.current.has(e.pointerId)) return
+    allPointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+    if (isPinchingRef.current) {
+      // ピンチ中は座席ドラッグに届かせない
+      e.stopPropagation()
+
+      if (pinchInitRef.current && allPointers.current.size >= 2) {
+        const pts = Array.from(allPointers.current.values())
+        const dist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y)
+        const newScale = pinchInitRef.current.scale * dist / pinchInitRef.current.distance
+        const rect = canvasRef.current!.getBoundingClientRect()
+        const midX = (pts[0].x + pts[1].x) / 2 - rect.left
+        const midY = (pts[0].y + pts[1].y) / 2 - rect.top
+        applyZoom(newScale, midX, midY)
+      }
+    }
+  }, [applyZoom, canvasRef])
+
+  const handleCaptureUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    allPointers.current.delete(e.pointerId)
+    if (allPointers.current.size < 2) {
+      isPinchingRef.current = false
+      pinchInitRef.current = null
+    }
+  }, [])
+
+  // ── 背景ハンドラー：パン ─────────────────────────────────────────
   const handleBgPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (isPinchingRef.current) return
     if (e.target !== e.currentTarget && e.target !== innerRef.current) return
     e.currentTarget.setPointerCapture(e.pointerId)
-    activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
-
-    if (activePointers.current.size === 2) {
-      // ピンチ開始
-      const pts = Array.from(activePointers.current.values())
-      const dist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y)
-      pinchInitial.current = {
-        distance: dist,
-        scale: scaleRef.current,
-      }
-      panInitial.current = null
-      suppressNextClick.current = true
-    } else {
-      // パン開始
-      panInitial.current = {
-        px: e.clientX,
-        py: e.clientY,
-        ox: offsetRef.current.x,
-        oy: offsetRef.current.y,
-      }
-      pinchInitial.current = null
+    bgPointerId.current = e.pointerId
+    panInitial.current = {
+      px: e.clientX,
+      py: e.clientY,
+      ox: offsetRef.current.x,
+      oy: offsetRef.current.y,
     }
   }, [])
 
   const handleBgPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!activePointers.current.has(e.pointerId)) return
-    activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    if (isPinchingRef.current) return
+    if (e.pointerId !== bgPointerId.current) return
+    if (!panInitial.current) return
 
-    if (pinchInitial.current && activePointers.current.size === 2) {
-      // ピンチズーム：2指の中点を anchor にスケール変更
-      const pts = Array.from(activePointers.current.values())
-      const dist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y)
-      const newScale = pinchInitial.current.scale * dist / pinchInitial.current.distance
-      const rect = canvasRef.current!.getBoundingClientRect()
-      const midX = (pts[0].x + pts[1].x) / 2 - rect.left
-      const midY = (pts[0].y + pts[1].y) / 2 - rect.top
-      applyZoom(newScale, midX, midY)
-    } else if (panInitial.current && activePointers.current.size === 1) {
-      // パン
-      const dx = e.clientX - panInitial.current.px
-      const dy = e.clientY - panInitial.current.py
-      if (Math.hypot(dx, dy) > 4) suppressNextClick.current = true
-      setOffset({ x: panInitial.current.ox + dx, y: panInitial.current.oy + dy })
-    }
-  }, [canvasRef])
-
-  const handleBgPointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    activePointers.current.delete(e.pointerId)
-    if (activePointers.current.size < 2) {
-      pinchInitial.current = null
-    }
-    if (activePointers.current.size === 1) {
-      // 指1本が残ったらパン継続
-      const remaining = Array.from(activePointers.current.entries())[0]
-      panInitial.current = {
-        px: remaining[1].x,
-        py: remaining[1].y,
-        ox: offsetRef.current.x,
-        oy: offsetRef.current.y,
-      }
-    } else if (activePointers.current.size === 0) {
-      panInitial.current = null
-    }
+    const dx = e.clientX - panInitial.current.px
+    const dy = e.clientY - panInitial.current.py
+    if (Math.hypot(dx, dy) > 4) suppressNextClick.current = true
+    const newOffset = { x: panInitial.current.ox + dx, y: panInitial.current.oy + dy }
+    offsetRef.current = newOffset
+    setOffset(newOffset)
   }, [])
 
-  // ホイールズーム（デスクトップ）：カーソル位置を anchor
+  const handleBgPointerUp = useCallback((_e: React.PointerEvent<HTMLDivElement>) => {
+    panInitial.current = null
+    bgPointerId.current = null
+  }, [])
+
+  // ── ホイールズーム（デスクトップ）───────────────────────────────
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault()
     const rect = canvasRef.current!.getBoundingClientRect()
@@ -151,7 +163,7 @@ export function Canvas({
     applyZoom(scaleRef.current + delta, mouseX, mouseY)
   }, [applyZoom, canvasRef])
 
-  // クリックで座席・オブジェクト配置
+  // ── クリックで座席・オブジェクト配置 ────────────────────────────
   const handleCanvasClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (suppressNextClick.current) {
@@ -160,8 +172,8 @@ export function Canvas({
       }
       if (e.target !== e.currentTarget && e.target !== innerRef.current) return
       const rect = canvasRef.current!.getBoundingClientRect()
-      const logicalX = (e.clientX - rect.left - offset.x) / scale
-      const logicalY = (e.clientY - rect.top - offset.y) / scale
+      const logicalX = (e.clientX - rect.left - offsetRef.current.x) / scaleRef.current
+      const logicalY = (e.clientY - rect.top - offsetRef.current.y) / scaleRef.current
 
       if (isPlacingLandmark) {
         const x = Math.round(logicalX - LANDMARK_WIDTH / 2)
@@ -182,10 +194,10 @@ export function Canvas({
         onSelectSeat(null)
       }
     },
-    [actions, canvasRef, isPlacingLandmark, offset, onLandmarkPlaced, onSelectSeat, scale]
+    [actions, canvasRef, isPlacingLandmark, onLandmarkPlaced, onSelectSeat]
   )
 
-  // +/- ボタン：キャンバス中央を anchor にズーム
+  // ── +/- ボタン：キャンバス中央を anchor ─────────────────────────
   const handleZoomBtn = useCallback((delta: number) => {
     const rect = canvasRef.current!.getBoundingClientRect()
     applyZoom(scaleRef.current + delta, rect.width / 2, rect.height / 2)
@@ -203,14 +215,16 @@ export function Canvas({
 
   return (
     <div
-      ref={canvasRef}
+      ref={(el) => { (canvasRef as React.MutableRefObject<HTMLDivElement | null>).current = el }}
       className={[styles.canvas, isPlacingLandmark ? styles.placingMode : ''].filter(Boolean).join(' ')}
       onClick={handleCanvasClick}
       onWheel={handleWheel}
+      onPointerDownCapture={handleCaptureDown}
+      onPointerMoveCapture={handleCaptureMove}
+      onPointerUpCapture={handleCaptureUp}
       onPointerDown={handleBgPointerDown}
       onPointerMove={handleBgPointerMove}
       onPointerUp={handleBgPointerUp}
-      title={isPlacingLandmark ? 'クリックしてオブジェクトを配置' : 'クリックして座席を追加'}
       data-testid="canvas"
     >
       {isEmpty && (
@@ -224,7 +238,6 @@ export function Canvas({
         className={styles.inner}
         style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})` }}
       >
-        {/* ランドマーク（座席の下に描画） */}
         {(state.landmarks ?? []).map((landmark) => (
           <LandmarkNode
             key={landmark.id}
@@ -238,7 +251,6 @@ export function Canvas({
           />
         ))}
 
-        {/* 座席 */}
         {state.seats.map((seat) => {
           const attendee = seat.assignedAttendeeId
             ? attendeeMap[seat.assignedAttendeeId]
