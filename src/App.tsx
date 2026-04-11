@@ -59,6 +59,7 @@ export function App() {
       canvasRef={canvasRef}
       isPlacingLandmark={isPlacingLandmark}
       onLandmarkPlaced={() => setIsPlacingLandmark(false)}
+      onTogglePlacingLandmark={() => setIsPlacingLandmark((v) => !v)}
     />
   )
 

@@ -23,6 +23,7 @@ interface Props {
   canvasRef: React.RefObject<HTMLDivElement | null>
   isPlacingLandmark: boolean
   onLandmarkPlaced: () => void
+  onTogglePlacingLandmark: () => void
 }
 
 export function Canvas({
@@ -33,6 +34,7 @@ export function Canvas({
   canvasRef,
   isPlacingLandmark,
   onLandmarkPlaced,
+  onTogglePlacingLandmark,
 }: Props) {
   const [scale, setScale] = useState(1)
   const [offset, setOffset] = useState({ x: 0, y: 0 })
@@ -251,6 +253,21 @@ export function Canvas({
             />
           )
         })}
+      </div>
+
+      {/* オブジェクト配置フローティングボタン */}
+      <div className={styles.placingBtn}>
+        <button
+          className={[styles.placingBtnInner, isPlacingLandmark ? styles.placingBtnActive : ''].filter(Boolean).join(' ')}
+          onClick={(e) => { e.stopPropagation(); onTogglePlacingLandmark() }}
+          onPointerDown={(e) => e.stopPropagation()}
+          data-testid="toggle-landmark-mode"
+        >
+          {isPlacingLandmark ? '✕ 配置モード解除' : '＋ オブジェクト配置'}
+        </button>
+        {isPlacingLandmark && (
+          <span className={styles.placingHint}>タップして配置 / ESCで解除</span>
+        )}
       </div>
 
       {/* ズームコントロール */}

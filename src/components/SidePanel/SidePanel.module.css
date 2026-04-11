@@ -294,6 +294,10 @@
     border-right: none;
   }
 
+  .objectSection {
+    display: none;
+  }
+
   .attendeeItem {
     padding: 10px 12px;
   }
