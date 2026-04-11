@@ -1,0 +1,134 @@
+.seat {
+  position: absolute;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  user-select: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  overflow: visible;
+}
+
+.seat:hover {
+  border-color: #94a3b8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+}
+
+.seat:active {
+  cursor: grabbing;
+}
+
+.selected {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+}
+
+.pinned {
+  border-color: #f59e0b !important;
+  background: #fffbeb;
+}
+
+.pinned.selected {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2) !important;
+}
+
+.occupied {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.label {
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  font-size: 9px;
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70px;
+  pointer-events: none;
+}
+
+.labelInput {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  width: 78px;
+  font-size: 9px;
+  border: 1px solid #3b82f6;
+  border-radius: 3px;
+  padding: 1px 3px;
+  outline: none;
+  z-index: 20;
+  background: white;
+}
+
+.name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  text-align: center;
+  padding: 0 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 80px;
+  pointer-events: none;
+}
+
+/* アクションボタン（ホバー時表示） */
+.actions {
+  position: absolute;
+  top: -14px;
+  right: -2px;
+  display: none;
+  gap: 2px;
+  z-index: 20;
+}
+
+.seat:hover .actions {
+  display: flex;
+}
+
+.actionBtn {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 4px;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  transition: background 0.1s;
+}
+
+.actionBtn:hover {
+  background: #cbd5e1;
+}
+
+.pinActive {
+  background: #fde68a !important;
+}
+
+.pinActive:hover {
+  background: #fcd34d !important;
+}
+
+.removeBtn:hover {
+  background: #fecaca !important;
+  color: #dc2626;
+}

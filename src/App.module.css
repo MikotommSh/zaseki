@@ -1,0 +1,7 @@
+.app {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI',
+    'Segoe UI', sans-serif;
+}

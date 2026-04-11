@@ -1,0 +1,83 @@
+.landmark {
+  position: absolute;
+  border: 2px dashed #16a34a;
+  border-radius: 8px;
+  background: #f0fdf4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  user-select: none;
+  box-shadow: 0 1px 4px rgba(22, 163, 74, 0.12);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  overflow: visible;
+}
+
+.landmark:hover {
+  border-color: #15803d;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.2);
+  z-index: 5;
+}
+
+.landmark:active {
+  cursor: grabbing;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #15803d;
+  text-align: center;
+  padding: 0 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 108px;
+  pointer-events: none;
+}
+
+.labelInput {
+  width: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #16a34a;
+  border-radius: 4px;
+  padding: 2px 6px;
+  outline: none;
+  background: white;
+  color: #15803d;
+  text-align: center;
+}
+
+.actions {
+  position: absolute;
+  top: -14px;
+  right: -2px;
+  display: none;
+  z-index: 20;
+}
+
+.landmark:hover .actions {
+  display: flex;
+}
+
+.removeBtn {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 4px;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.1s, color 0.1s;
+}
+
+.removeBtn:hover {
+  background: #fecaca;
+  color: #dc2626;
+}
