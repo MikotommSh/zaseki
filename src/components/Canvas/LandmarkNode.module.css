@@ -8,6 +8,7 @@
   justify-content: center;
   cursor: grab;
   user-select: none;
+  touch-action: none;
   box-shadow: 0 1px 4px rgba(22, 163, 74, 0.12);
   transition: border-color 0.15s, box-shadow 0.15s;
   overflow: visible;

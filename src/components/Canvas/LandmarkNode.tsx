@@ -13,9 +13,10 @@ interface Props {
   onRemove: () => void
   onLabelSave: (label: string) => void
   getBounds: () => { width: number; height: number }
+  scale?: number
 }
 
-export function LandmarkNode({ landmark, onMove, onDrop, onRemove, onLabelSave, getBounds }: Props) {
+export function LandmarkNode({ landmark, onMove, onDrop, onRemove, onLabelSave, getBounds, scale }: Props) {
   const [isEditingLabel, setIsEditingLabel] = useState(false)
   const [labelInput, setLabelInput] = useState(landmark.label)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -25,6 +26,7 @@ export function LandmarkNode({ landmark, onMove, onDrop, onRemove, onLabelSave, 
     onDrop,
     getBounds,
     seatSize: { width: LANDMARK_WIDTH, height: LANDMARK_HEIGHT },
+    scale,
   })
 
   const handleDoubleClick = useCallback((e: React.MouseEvent) => {

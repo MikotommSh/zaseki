@@ -18,6 +18,7 @@ interface Props {
   onLabelSave: (label: string) => void
   onUnassign: () => void
   getBounds: () => { width: number; height: number }
+  scale?: number
 }
 
 export function SeatNode({
@@ -32,6 +33,7 @@ export function SeatNode({
   onLabelSave,
   onUnassign,
   getBounds,
+  scale,
 }: Props) {
   const [isEditingLabel, setIsEditingLabel] = useState(false)
   const [labelInput, setLabelInput] = useState(seat.label ?? '')
@@ -43,6 +45,7 @@ export function SeatNode({
     onClick,
     getBounds,
     seatSize: { width: SEAT_WIDTH, height: SEAT_HEIGHT },
+    scale,
   })
 
   const handleDoubleClick = useCallback(

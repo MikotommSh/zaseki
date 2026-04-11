@@ -6,6 +6,7 @@ interface DragOptions {
   onClick?: () => void
   getBounds?: () => { width: number; height: number }
   seatSize?: { width: number; height: number }
+  scale?: number
 }
 
 const DRAG_THRESHOLD = 4
@@ -31,8 +32,9 @@ export function useDrag(options: DragOptions) {
   const onPointerMove = useCallback(
     (e: React.PointerEvent) => {
       if (!isDragging.current) return
-      const dx = e.clientX - startPointer.current.x
-      const dy = e.clientY - startPointer.current.y
+      const s = options.scale ?? 1
+      const dx = (e.clientX - startPointer.current.x) / s
+      const dy = (e.clientY - startPointer.current.y) / s
 
       if (!hasMoved.current && Math.hypot(dx, dy) < DRAG_THRESHOLD) return
       hasMoved.current = true
@@ -61,8 +63,9 @@ export function useDrag(options: DragOptions) {
         return
       }
 
-      const dx = e.clientX - startPointer.current.x
-      const dy = e.clientY - startPointer.current.y
+      const s = options.scale ?? 1
+      const dx = (e.clientX - startPointer.current.x) / s
+      const dy = (e.clientY - startPointer.current.y) / s
       let newX = startSeat.current.x + dx
       let newY = startSeat.current.y + dy
 

@@ -46,6 +46,7 @@ export function App() {
       canvasRef={canvasRef}
       isPlacingLandmark={isPlacingLandmark}
       onTogglePlacingLandmark={() => setIsPlacingLandmark((v) => !v)}
+      onAfterShuffle={isMobile ? () => setActiveTab('canvas') : undefined}
     />
   )
 

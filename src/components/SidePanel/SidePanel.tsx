@@ -13,9 +13,10 @@ interface Props {
   canvasRef: React.RefObject<HTMLDivElement | null>
   isPlacingLandmark: boolean
   onTogglePlacingLandmark: () => void
+  onAfterShuffle?: () => void
 }
 
-export function SidePanel({ state, actions, selectedSeatId, canvasRef, isPlacingLandmark, onTogglePlacingLandmark }: Props) {
+export function SidePanel({ state, actions, selectedSeatId, canvasRef, isPlacingLandmark, onTogglePlacingLandmark, onAfterShuffle }: Props) {
   const [inputName, setInputName] = useState('')
   const [shareMsg, setShareMsg] = useState('')
   const [isExporting, setIsExporting] = useState(false)
@@ -162,7 +163,7 @@ export function SidePanel({ state, actions, selectedSeatId, canvasRef, isPlacing
       <div className={styles.actions}>
         <button
           className={[styles.btn, styles.shuffleBtn].join(' ')}
-          onClick={actions.shuffleSeats}
+          onClick={() => { actions.shuffleSeats(); onAfterShuffle?.() }}
           disabled={state.seats.length === 0 || state.attendees.length === 0}
           title={`未割り当て: ${unassignedCount}人 / 空き席: ${emptySeatCount}席`}
         >
