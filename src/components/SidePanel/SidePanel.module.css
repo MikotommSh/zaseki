@@ -286,3 +286,37 @@
   color: #94a3b8;
   margin: 2px 0;
 }
+
+/* モバイル対応 */
+@media (max-width: 640px) {
+  .panel {
+    width: 100%;
+    border-right: none;
+  }
+
+  .attendeeItem {
+    padding: 10px 12px;
+  }
+
+  .removeBtn {
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
+  }
+
+  .addBtn {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  .nameInput {
+    height: 44px;
+    font-size: 15px;
+  }
+
+  .btn {
+    padding: 14px 10px;
+    font-size: 15px;
+  }
+}

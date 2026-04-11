@@ -9,6 +9,8 @@ export function App() {
   const appState = useAppState()
   const [selectedSeatId, setSelectedSeatId] = useState<string | null>(null)
   const [isPlacingLandmark, setIsPlacingLandmark] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 640)
+  const [activeTab, setActiveTab] = useState<'canvas' | 'panel'>('canvas')
   const canvasRef = useRef<HTMLDivElement>(null)
 
   const handleLoadState = useCallback(
@@ -29,25 +31,62 @@ export function App() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
+  // ウィンドウ幅の監視
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 640)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  const sidePanel = (
+    <SidePanel
+      state={appState.state}
+      actions={appState}
+      selectedSeatId={selectedSeatId}
+      canvasRef={canvasRef}
+      isPlacingLandmark={isPlacingLandmark}
+      onTogglePlacingLandmark={() => setIsPlacingLandmark((v) => !v)}
+    />
+  )
+
+  const canvas = (
+    <Canvas
+      state={appState.state}
+      actions={appState}
+      selectedSeatId={selectedSeatId}
+      onSelectSeat={setSelectedSeatId}
+      canvasRef={canvasRef}
+      isPlacingLandmark={isPlacingLandmark}
+      onLandmarkPlaced={() => setIsPlacingLandmark(false)}
+    />
+  )
+
+  if (isMobile) {
+    return (
+      <div className={styles.app}>
+        {activeTab === 'panel' ? sidePanel : canvas}
+        <nav className={styles.tabBar}>
+          <button
+            className={activeTab === 'canvas' ? styles.tabActive : styles.tabBtn}
+            onClick={() => setActiveTab('canvas')}
+          >
+            🗺 キャンバス
+          </button>
+          <button
+            className={activeTab === 'panel' ? styles.tabActive : styles.tabBtn}
+            onClick={() => setActiveTab('panel')}
+          >
+            👥 出席者
+          </button>
+        </nav>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.app}>
-      <SidePanel
-        state={appState.state}
-        actions={appState}
-        selectedSeatId={selectedSeatId}
-        canvasRef={canvasRef}
-        isPlacingLandmark={isPlacingLandmark}
-        onTogglePlacingLandmark={() => setIsPlacingLandmark((v) => !v)}
-      />
-      <Canvas
-        state={appState.state}
-        actions={appState}
-        selectedSeatId={selectedSeatId}
-        onSelectSeat={setSelectedSeatId}
-        canvasRef={canvasRef}
-        isPlacingLandmark={isPlacingLandmark}
-        onLandmarkPlaced={() => setIsPlacingLandmark(false)}
-      />
+      {sidePanel}
+      {canvas}
     </div>
   )
 }

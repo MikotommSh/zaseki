@@ -132,3 +132,12 @@
   background: #fecaca !important;
   color: #dc2626;
 }
+
+/* モバイル対応 */
+@media (max-width: 640px) {
+  .actionBtn {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+  }
+}
