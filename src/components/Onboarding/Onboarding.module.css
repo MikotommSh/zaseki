@@ -1,0 +1,185 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+  padding-top: calc(24px + env(safe-area-inset-top));
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.card {
+  position: relative;
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 360px;
+  padding: 48px 28px 28px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-sizing: border-box;
+  /* スワイプ中に画面がスクロールしないよう */
+  touch-action: pan-y;
+}
+
+/* 閉じるボタン */
+.closeBtn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.closeBtn:hover {
+  background: #e2e8f0;
+}
+
+/* スライドコンテンツ */
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-height: 180px;
+  justify-content: center;
+}
+
+.emoji {
+  font-size: 64px;
+  line-height: 1;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  text-align: center;
+}
+
+.body {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.7;
+  text-align: center;
+  margin: 0;
+}
+
+/* ドットインジケーター */
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: #e2e8f0;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.dotActive {
+  background: #3b82f6;
+  transform: scale(1.3);
+}
+
+/* ナビゲーション */
+.nav {
+  display: flex;
+  gap: 10px;
+}
+
+.prevBtn {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: transparent;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.prevBtn:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.prevBtn:not(:disabled):hover {
+  background: #f1f5f9;
+}
+
+.nextBtn {
+  flex: 2;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #3b82f6;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.nextBtn:hover {
+  background: #2563eb;
+}
+
+/* モバイル: カードを画面いっぱいに近い大きさに */
+@media (max-width: 640px) {
+  .overlay {
+    padding: 16px;
+    padding-top: calc(16px + env(safe-area-inset-top));
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    align-items: flex-end;
+  }
+
+  .card {
+    max-width: 100%;
+    border-radius: 20px 20px 16px 16px;
+    padding: 44px 24px 24px;
+  }
+
+  .emoji {
+    font-size: 72px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .body {
+    font-size: 15px;
+  }
+
+  .prevBtn,
+  .nextBtn {
+    padding: 14px;
+    font-size: 15px;
+  }
+}

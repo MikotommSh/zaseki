@@ -17,7 +17,6 @@ interface Props {
   onTogglePin: () => void
   onLabelSave: (label: string) => void
   onUnassign: () => void
-  getBounds: () => { width: number; height: number }
   scale?: number
 }
 
@@ -32,21 +31,13 @@ export function SeatNode({
   onTogglePin,
   onLabelSave,
   onUnassign,
-  getBounds,
   scale,
 }: Props) {
   const [isEditingLabel, setIsEditingLabel] = useState(false)
   const [labelInput, setLabelInput] = useState(seat.label ?? '')
   const labelRef = useRef<HTMLInputElement>(null)
 
-  const drag = useDrag({
-    onMove,
-    onDrop,
-    onClick,
-    getBounds,
-    seatSize: { width: SEAT_WIDTH, height: SEAT_HEIGHT },
-    scale,
-  })
+  const drag = useDrag({ onMove, onDrop, onClick, scale })
 
   const handleDoubleClick = useCallback(
     (e: React.MouseEvent) => {

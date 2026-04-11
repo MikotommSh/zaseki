@@ -1,10 +1,14 @@
 import { useState, useCallback, useRef } from 'react'
+import { Capacitor } from '@capacitor/core'
+import { Share } from '@capacitor/share'
 import type { AppState } from '../../types'
 import type { AppActions } from '../../store/useAppState'
 import { AttendeeItem } from './AttendeeItem'
 import { encodeState } from '../../utils/urlCodec'
 import { exportImageFit } from '../../utils/exportImage'
 import styles from './SidePanel.module.css'
+
+const WEB_BASE_URL = 'https://mikotommsh.github.io/zaseki/'
 
 interface Props {
   state: AppState
@@ -15,9 +19,10 @@ interface Props {
   isPlacingLandmark: boolean
   onTogglePlacingLandmark: () => void
   onAfterShuffle?: () => void
+  onShowOnboarding: () => void
 }
 
-export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef, isPlacingLandmark, onTogglePlacingLandmark, onAfterShuffle }: Props) {
+export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef, isPlacingLandmark, onTogglePlacingLandmark, onAfterShuffle, onShowOnboarding }: Props) {
   const [inputName, setInputName] = useState('')
   const [shareMsg, setShareMsg] = useState('')
   const [isExporting, setIsExporting] = useState(false)
@@ -40,14 +45,22 @@ export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef,
 
   const handleShare = useCallback(async () => {
     const encoded = encodeState(state)
-    const url = `${window.location.origin}${window.location.pathname}#${encoded}`
-    try {
-      await navigator.clipboard.writeText(url)
-      setShareMsg('URLをコピーしました！')
-    } catch {
-      setShareMsg('URLのコピーに失敗しました')
+    const shareUrl = `${WEB_BASE_URL}#${encoded}`
+    if (Capacitor.isNativePlatform()) {
+      try {
+        await Share.share({ url: shareUrl, title: '座席表を共有' })
+      } catch {
+        // ユーザーがシェートをキャンセルした場合など、何もしない
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl)
+        setShareMsg('URLをコピーしました！')
+      } catch {
+        setShareMsg('URLのコピーに失敗しました')
+      }
+      setTimeout(() => setShareMsg(''), 2500)
     }
-    setTimeout(() => setShareMsg(''), 2500)
   }, [state])
 
   const handleExport = useCallback(async () => {
@@ -188,8 +201,15 @@ export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef,
       </div>
 
       <div className={styles.footer}>
-        <p>ダブルクリック: ラベル編集</p>
-        <p>右クリック: 削除</p>
+        {/* デスクトップ（マウス）向け */}
+        <p className={styles.footerDesktop}>ダブルクリック: ラベル編集</p>
+        <p className={styles.footerDesktop}>右クリック: 削除</p>
+        {/* タッチデバイス（スマホ・タブレット）向け */}
+        <p className={styles.footerMobile}>ダブルタップ: ラベル編集</p>
+        <p className={styles.footerMobile}>タップ → ✕: 削除</p>
+        <button className={styles.helpBtn} onClick={onShowOnboarding}>
+          使い方を見る
+        </button>
       </div>
     </aside>
   )

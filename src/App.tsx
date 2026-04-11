@@ -3,6 +3,7 @@ import { useAppState } from './store/useAppState'
 import { useUrlState } from './hooks/useUrlState'
 import { SidePanel } from './components/SidePanel/SidePanel'
 import { Canvas } from './components/Canvas/Canvas'
+import { Onboarding, hasSeenOnboarding } from './components/Onboarding/Onboarding'
 import styles from './App.module.css'
 
 export function App() {
@@ -11,6 +12,7 @@ export function App() {
   const [isPlacingLandmark, setIsPlacingLandmark] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 640)
   const [activeTab, setActiveTab] = useState<'canvas' | 'panel'>('canvas')
+  const [showOnboarding, setShowOnboarding] = useState(!hasSeenOnboarding())
   const canvasRef = useRef<HTMLDivElement>(null)
   const innerRef = useRef<HTMLDivElement>(null)
 
@@ -49,6 +51,7 @@ export function App() {
       isPlacingLandmark={isPlacingLandmark}
       onTogglePlacingLandmark={() => setIsPlacingLandmark((v) => !v)}
       onAfterShuffle={isMobile ? () => setActiveTab('canvas') : undefined}
+      onShowOnboarding={() => setShowOnboarding(true)}
     />
   )
 
@@ -69,6 +72,7 @@ export function App() {
   if (isMobile) {
     return (
       <div className={styles.app}>
+        {showOnboarding && <Onboarding onClose={() => setShowOnboarding(false)} />}
         <div className={styles.tabContent}>
           <div className={[styles.tabPane, activeTab !== 'canvas' ? styles.tabPaneHidden : ''].filter(Boolean).join(' ')}>
             {canvas}
@@ -91,12 +95,13 @@ export function App() {
             👥 出席者
           </button>
         </nav>
-        </div>
+      </div>
     )
   }
 
   return (
     <div className={styles.app}>
+      {showOnboarding && <Onboarding onClose={() => setShowOnboarding(false)} />}
       {sidePanel}
       {canvas}
     </div>

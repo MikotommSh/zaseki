@@ -61,7 +61,6 @@ export function Canvas({
   const suppressNextClick = useRef(false)
 
   const attendeeMap = Object.fromEntries(state.attendees.map((a) => [a.id, a]))
-  const getBounds = useCallback(() => ({ width: WORLD_W, height: WORLD_H }), [])
 
   // ── ズームのコアロジック ─────────────────────────────────────────
   const applyZoom = useCallback((newScale: number, anchorX: number, anchorY: number) => {
@@ -179,19 +178,12 @@ export function Canvas({
       if (isPlacingLandmark) {
         const x = Math.round(logicalX - LANDMARK_WIDTH / 2)
         const y = Math.round(logicalY - LANDMARK_HEIGHT / 2)
-        actions.addLandmark(
-          Math.max(0, Math.min(x, WORLD_W - LANDMARK_WIDTH)),
-          Math.max(0, Math.min(y, WORLD_H - LANDMARK_HEIGHT)),
-          'オブジェクト'
-        )
+        actions.addLandmark(x, y, 'オブジェクト')
         onLandmarkPlaced()
       } else {
         const x = Math.round(logicalX - SEAT_WIDTH / 2)
         const y = Math.round(logicalY - SEAT_HEIGHT / 2)
-        actions.addSeat(
-          Math.max(0, Math.min(x, WORLD_W - SEAT_WIDTH)),
-          Math.max(0, Math.min(y, WORLD_H - SEAT_HEIGHT))
-        )
+        actions.addSeat(x, y)
         onSelectSeat(null)
       }
     },
@@ -247,7 +239,6 @@ export function Canvas({
             onDrop={(x, y) => actions.moveLandmark(landmark.id, x, y)}
             onRemove={() => actions.removeLandmark(landmark.id)}
             onLabelSave={(label) => actions.updateLandmarkLabel(landmark.id, label)}
-            getBounds={getBounds}
             scale={scale}
           />
         ))}
@@ -272,7 +263,6 @@ export function Canvas({
               onTogglePin={() => actions.togglePin(seat.id)}
               onLabelSave={(label) => actions.updateSeatLabel(seat.id, label)}
               onUnassign={() => actions.unassignSeat(seat.id)}
-              getBounds={getBounds}
               scale={scale}
             />
           )

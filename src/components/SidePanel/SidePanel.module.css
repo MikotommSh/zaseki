@@ -287,6 +287,36 @@
   margin: 2px 0;
 }
 
+/* 使い方ボタン */
+.helpBtn {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.helpBtn:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* デスクトップ（マウス）: desktop テキストを表示、mobile テキストを非表示 */
+.footerDesktop { display: block; }
+.footerMobile  { display: none; }
+
+/* タッチデバイス（スマホ・タブレット）: 逆転 */
+@media (pointer: coarse) {
+  .footerDesktop { display: none; }
+  .footerMobile  { display: block; }
+}
+
 /* モバイル対応 */
 @media (max-width: 640px) {
   .panel {

@@ -4,8 +4,6 @@ interface DragOptions {
   onMove: (x: number, y: number) => void
   onDrop: (x: number, y: number) => void
   onClick?: () => void
-  getBounds?: () => { width: number; height: number }
-  seatSize?: { width: number; height: number }
   scale?: number
 }
 
@@ -39,14 +37,8 @@ export function useDrag(options: DragOptions) {
       if (!hasMoved.current && Math.hypot(dx, dy) < DRAG_THRESHOLD) return
       hasMoved.current = true
 
-      let newX = startSeat.current.x + dx
-      let newY = startSeat.current.y + dy
-
-      if (options.getBounds && options.seatSize) {
-        const bounds = options.getBounds()
-        newX = Math.max(0, Math.min(newX, bounds.width - options.seatSize.width))
-        newY = Math.max(0, Math.min(newY, bounds.height - options.seatSize.height))
-      }
+      const newX = startSeat.current.x + dx
+      const newY = startSeat.current.y + dy
 
       options.onMove(newX, newY)
     },
@@ -66,14 +58,8 @@ export function useDrag(options: DragOptions) {
       const s = options.scale ?? 1
       const dx = (e.clientX - startPointer.current.x) / s
       const dy = (e.clientY - startPointer.current.y) / s
-      let newX = startSeat.current.x + dx
-      let newY = startSeat.current.y + dy
-
-      if (options.getBounds && options.seatSize) {
-        const bounds = options.getBounds()
-        newX = Math.max(0, Math.min(newX, bounds.width - options.seatSize.width))
-        newY = Math.max(0, Math.min(newY, bounds.height - options.seatSize.height))
-      }
+      const newX = startSeat.current.x + dx
+      const newY = startSeat.current.y + dy
 
       options.onDrop(newX, newY)
     },

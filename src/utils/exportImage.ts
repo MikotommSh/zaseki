@@ -10,58 +10,28 @@ export async function exportImage(element: HTMLElement): Promise<void> {
     useCORS: true,
   })
 
-  const dataUrl = canvas.toDataURL('image/png')
-  const isMobile = 'ontouchstart' in window || window.matchMedia('(max-width: 640px)').matches
+  const blob = await new Promise<Blob>((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('toBlob failed'))), 'image/png')
+  )
 
-  if (!isMobile) {
-    // デスクトップ: オブジェクトURLでダウンロード
-    const blob = await new Promise<Blob>((resolve, reject) =>
-      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('toBlob failed'))), 'image/png')
-    )
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = 'zaseki.png'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+  const file = new File([blob], 'zaseki.png', { type: 'image/png' })
+
+  // iOS / Android: ネイティブ共有シートでファイル共有
+  // → 写真に保存・AirDrop・LINE などが選択できる
+  if (navigator.canShare?.({ files: [file] })) {
+    await navigator.share({ files: [file], title: '座席表' })
     return
   }
 
-  // モバイル: iOS は <a download> もシェアAPIも html2canvas の await 後は動かないため
-  // 画像をオーバーレイ表示して長押し保存してもらう
-  showImageOverlay(dataUrl)
-}
-
-function showImageOverlay(dataUrl: string): void {
-  const overlay = document.createElement('div')
-  overlay.style.cssText = [
-    'position:fixed', 'inset:0', 'background:rgba(0,0,0,0.88)', 'z-index:9999',
-    'display:flex', 'flex-direction:column', 'align-items:center', 'justify-content:center',
-    'gap:16px', 'padding:16px', 'box-sizing:border-box',
-  ].join(';')
-
-  const msg = document.createElement('p')
-  msg.textContent = '画像を長押し → 写真に追加'
-  msg.style.cssText = 'color:#fff;font-size:15px;margin:0;text-align:center;'
-
-  const img = document.createElement('img')
-  img.src = dataUrl
-  img.style.cssText = 'max-width:100%;max-height:65vh;object-fit:contain;border-radius:8px;'
-
-  const closeBtn = document.createElement('button')
-  closeBtn.textContent = '閉じる'
-  closeBtn.style.cssText = [
-    'padding:12px 40px', 'background:#fff', 'border:none', 'border-radius:8px',
-    'font-size:16px', 'font-weight:600', 'cursor:pointer',
-  ].join(';')
-  closeBtn.onclick = () => overlay.remove()
-
-  overlay.appendChild(msg)
-  overlay.appendChild(img)
-  overlay.appendChild(closeBtn)
-  document.body.appendChild(overlay)
+  // デスクトップ: ダウンロード
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'zaseki.png'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }
 
 /** 全要素が収まるようにズームアウトしてから書き出す */

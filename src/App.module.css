@@ -1,9 +1,15 @@
 .app {
   display: flex;
-  height: 100vh;
+  /* dvh: ブラウザUI（アドレスバー等）を除いた動的ビューポート高さ */
+  height: 100dvh;
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI',
     'Segoe UI', sans-serif;
+  /* iOS ノッチ・Dynamic Island: コンテンツをステータスバー下に押し下げる */
+  padding-top: env(safe-area-inset-top);
+  /* 左右の safe area（iPad / iPhone 横向き対応） */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 /* モバイル: タブ切り替えレイアウト */
@@ -35,10 +41,15 @@
 
 .tabBar {
   display: flex;
-  height: 52px;
+  /* ホームインジケーター分を含む高さ: 52px + safe-area-bottom */
+  height: calc(52px + env(safe-area-inset-bottom));
   flex-shrink: 0;
   border-top: 1px solid #e2e8f0;
   background: #ffffff;
+  /* タブボタンをホームインジケーターの上に配置 */
+  padding-bottom: env(safe-area-inset-bottom);
+  /* ボタンを上部の52px内に配置するためにアイテムを上揃え */
+  align-items: flex-start;
 }
 
 .tabBtn {
