@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/shotaro/Development/**)",
+      "Bash(npm --version)",
+      "Bash(bun --version)",
+      "Bash(pnpm --version)",
+      "Bash(npm list:*)",
+      "Bash(npx --version)",
+      "Bash(gh --version)",
+      "Bash(npm create:*)",
+      "Bash(npm install:*)"
+    ]
+  }
+}
