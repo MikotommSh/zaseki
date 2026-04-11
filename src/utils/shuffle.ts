@@ -16,16 +16,24 @@ export function shuffle(seats: Seat[], attendeeIds: string[]): Seat[] {
   // シャッフル対象の出席者（ピンなし）
   const freeAttendees = attendeeIds.filter((id) => !pinnedAttendeeIds.has(id))
 
-  // Fisher-Yates shuffle
+  // Fisher-Yates shuffle（出席者）
   const shuffled = [...freeAttendees]
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
   }
 
+  // Fisher-Yates shuffle（座席）
+  // 座席数 > 出席者数の場合、どの席が空席になるかもランダムにする
+  const shuffledSeatIds = [...freeSeatIds]
+  for (let i = shuffledSeatIds.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffledSeatIds[i], shuffledSeatIds[j]] = [shuffledSeatIds[j], shuffledSeatIds[i]]
+  }
+
   // 割り当てマップ作成: seatId → attendeeId | undefined
   const assignmentMap = new Map<string, string | undefined>()
-  freeSeatIds.forEach((seatId, index) => {
+  shuffledSeatIds.forEach((seatId, index) => {
     assignmentMap.set(seatId, shuffled[index])
   })
 
