@@ -3,7 +3,7 @@ import type { AppState } from '../../types'
 import type { AppActions } from '../../store/useAppState'
 import { AttendeeItem } from './AttendeeItem'
 import { encodeState } from '../../utils/urlCodec'
-import { exportImage } from '../../utils/exportImage'
+import { exportImageFit } from '../../utils/exportImage'
 import styles from './SidePanel.module.css'
 
 interface Props {
@@ -11,12 +11,13 @@ interface Props {
   actions: AppActions
   selectedSeatId: string | null
   canvasRef: React.RefObject<HTMLDivElement | null>
+  innerRef: React.MutableRefObject<HTMLDivElement | null>
   isPlacingLandmark: boolean
   onTogglePlacingLandmark: () => void
   onAfterShuffle?: () => void
 }
 
-export function SidePanel({ state, actions, selectedSeatId, canvasRef, isPlacingLandmark, onTogglePlacingLandmark, onAfterShuffle }: Props) {
+export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef, isPlacingLandmark, onTogglePlacingLandmark, onAfterShuffle }: Props) {
   const [inputName, setInputName] = useState('')
   const [shareMsg, setShareMsg] = useState('')
   const [isExporting, setIsExporting] = useState(false)
@@ -50,14 +51,14 @@ export function SidePanel({ state, actions, selectedSeatId, canvasRef, isPlacing
   }, [state])
 
   const handleExport = useCallback(async () => {
-    if (!canvasRef.current || isExporting) return
+    if (!canvasRef.current || !innerRef.current || isExporting) return
     setIsExporting(true)
     try {
-      await exportImage(canvasRef.current)
+      await exportImageFit(canvasRef.current, innerRef.current, state)
     } finally {
       setIsExporting(false)
     }
-  }, [canvasRef, isExporting])
+  }, [canvasRef, innerRef, state, isExporting])
 
   // 座席マップ: attendeeId → Seat
   const seatByAttendee = Object.fromEntries(

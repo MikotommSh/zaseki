@@ -12,6 +12,7 @@ export function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 640)
   const [activeTab, setActiveTab] = useState<'canvas' | 'panel'>('canvas')
   const canvasRef = useRef<HTMLDivElement>(null)
+  const innerRef = useRef<HTMLDivElement>(null)
 
   const handleLoadState = useCallback(
     (state: Parameters<typeof appState.loadState>[0]) => {
@@ -44,6 +45,7 @@ export function App() {
       actions={appState}
       selectedSeatId={selectedSeatId}
       canvasRef={canvasRef}
+      innerRef={innerRef}
       isPlacingLandmark={isPlacingLandmark}
       onTogglePlacingLandmark={() => setIsPlacingLandmark((v) => !v)}
       onAfterShuffle={isMobile ? () => setActiveTab('canvas') : undefined}
@@ -57,6 +59,7 @@ export function App() {
       selectedSeatId={selectedSeatId}
       onSelectSeat={setSelectedSeatId}
       canvasRef={canvasRef}
+      innerRef={innerRef}
       isPlacingLandmark={isPlacingLandmark}
       onLandmarkPlaced={() => setIsPlacingLandmark(false)}
       onTogglePlacingLandmark={() => setIsPlacingLandmark((v) => !v)}
@@ -66,7 +69,14 @@ export function App() {
   if (isMobile) {
     return (
       <div className={styles.app}>
-        {activeTab === 'panel' ? sidePanel : canvas}
+        <div className={styles.tabContent}>
+          <div className={[styles.tabPane, activeTab !== 'canvas' ? styles.tabPaneHidden : ''].filter(Boolean).join(' ')}>
+            {canvas}
+          </div>
+          <div className={[styles.tabPane, activeTab !== 'panel' ? styles.tabPaneHidden : ''].filter(Boolean).join(' ')}>
+            {sidePanel}
+          </div>
+        </div>
         <nav className={styles.tabBar}>
           <button
             className={activeTab === 'canvas' ? styles.tabActive : styles.tabBtn}
@@ -81,7 +91,7 @@ export function App() {
             👥 出席者
           </button>
         </nav>
-      </div>
+        </div>
     )
   }
 

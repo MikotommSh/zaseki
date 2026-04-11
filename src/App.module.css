@@ -14,6 +14,25 @@
   }
 }
 
+/* モバイルタブコンテンツ: 常にマウントしてrefを保持、非アクティブは隠す */
+.tabContent {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+.tabPane {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tabPaneHidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .tabBar {
   display: flex;
   height: 52px;

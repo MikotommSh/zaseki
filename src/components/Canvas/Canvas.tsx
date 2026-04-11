@@ -21,6 +21,7 @@ interface Props {
   selectedSeatId: string | null
   onSelectSeat: (id: string | null) => void
   canvasRef: React.RefObject<HTMLDivElement | null>
+  innerRef: React.MutableRefObject<HTMLDivElement | null>
   isPlacingLandmark: boolean
   onLandmarkPlaced: () => void
   onTogglePlacingLandmark: () => void
@@ -32,13 +33,13 @@ export function Canvas({
   selectedSeatId,
   onSelectSeat,
   canvasRef,
+  innerRef,
   isPlacingLandmark,
   onLandmarkPlaced,
   onTogglePlacingLandmark,
 }: Props) {
   const [scale, setScale] = useState(1)
   const [offset, setOffset] = useState({ x: 0, y: 0 })
-  const innerRef = useRef<HTMLDivElement | null>(null)
 
   // ref は連続イベント間の「現在値」として使う（setState は再レンダー用）
   const scaleRef = useRef(scale)
