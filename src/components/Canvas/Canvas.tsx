@@ -42,13 +42,31 @@ export function Canvas({
 
   // ポインター追跡（パン・ピンチ用）
   const activePointers = useRef<Map<number, { x: number; y: number }>>(new Map())
-  const pinchInitial = useRef<{ distance: number; scale: number; midX: number; midY: number } | null>(null)
+  const pinchInitial = useRef<{ distance: number; scale: number } | null>(null)
   const panInitial = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null)
   const suppressNextClick = useRef(false)
+
+  // ref は連続イベント間の「現在値」として使う（setState は再レンダー用）
   const scaleRef = useRef(scale)
   const offsetRef = useRef(offset)
   scaleRef.current = scale
   offsetRef.current = offset
+
+  // ズームのコアロジック：anchor 点を固定したままスケール変更
+  const applyZoom = useCallback((newScale: number, anchorX: number, anchorY: number) => {
+    const clamped = clampScale(newScale)
+    const prevScale = scaleRef.current
+    if (prevScale === clamped) return
+    const newOffset = {
+      x: anchorX - (anchorX - offsetRef.current.x) * (clamped / prevScale),
+      y: anchorY - (anchorY - offsetRef.current.y) * (clamped / prevScale),
+    }
+    // 再レンダー前に ref を更新することで連続イベントが最新値を参照できる
+    scaleRef.current = clamped
+    offsetRef.current = newOffset
+    setScale(clamped)
+    setOffset(newOffset)
+  }, [])
 
   const attendeeMap = Object.fromEntries(state.attendees.map((a) => [a.id, a]))
 
@@ -67,8 +85,6 @@ export function Canvas({
       pinchInitial.current = {
         distance: dist,
         scale: scaleRef.current,
-        midX: (pts[0].x + pts[1].x) / 2,
-        midY: (pts[0].y + pts[1].y) / 2,
       }
       panInitial.current = null
       suppressNextClick.current = true
@@ -89,20 +105,14 @@ export function Canvas({
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
 
     if (pinchInitial.current && activePointers.current.size === 2) {
-      // ピンチズーム
+      // ピンチズーム：2指の中点を anchor にスケール変更
       const pts = Array.from(activePointers.current.values())
       const dist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y)
-      const newScale = clampScale(pinchInitial.current.scale * dist / pinchInitial.current.distance)
+      const newScale = pinchInitial.current.scale * dist / pinchInitial.current.distance
       const rect = canvasRef.current!.getBoundingClientRect()
       const midX = (pts[0].x + pts[1].x) / 2 - rect.left
       const midY = (pts[0].y + pts[1].y) / 2 - rect.top
-      // ピンチ中心を固定したままスケール変更
-      const prevScale = scaleRef.current
-      setOffset((prev) => ({
-        x: midX - (midX - prev.x) * (newScale / prevScale),
-        y: midY - (midY - prev.y) * (newScale / prevScale),
-      }))
-      setScale(newScale)
+      applyZoom(newScale, midX, midY)
     } else if (panInitial.current && activePointers.current.size === 1) {
       // パン
       const dx = e.clientX - panInitial.current.px
@@ -131,22 +141,15 @@ export function Canvas({
     }
   }, [])
 
-  // ホイールズーム（デスクトップ）
+  // ホイールズーム（デスクトップ）：カーソル位置を anchor
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault()
     const rect = canvasRef.current!.getBoundingClientRect()
     const mouseX = e.clientX - rect.left
     const mouseY = e.clientY - rect.top
     const delta = e.deltaY > 0 ? -SCALE_STEP : SCALE_STEP
-    setScale((prev) => {
-      const next = clampScale(prev + delta)
-      setOffset((o) => ({
-        x: mouseX - (mouseX - o.x) * (next / prev),
-        y: mouseY - (mouseY - o.y) * (next / prev),
-      }))
-      return next
-    })
-  }, [canvasRef])
+    applyZoom(scaleRef.current + delta, mouseX, mouseY)
+  }, [applyZoom, canvasRef])
 
   // クリックで座席・オブジェクト配置
   const handleCanvasClick = useCallback(
@@ -182,8 +185,16 @@ export function Canvas({
     [actions, canvasRef, isPlacingLandmark, offset, onLandmarkPlaced, onSelectSeat, scale]
   )
 
+  // +/- ボタン：キャンバス中央を anchor にズーム
+  const handleZoomBtn = useCallback((delta: number) => {
+    const rect = canvasRef.current!.getBoundingClientRect()
+    applyZoom(scaleRef.current + delta, rect.width / 2, rect.height / 2)
+  }, [applyZoom, canvasRef])
+
   const handleReset = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
+    scaleRef.current = 1
+    offsetRef.current = { x: 0, y: 0 }
     setScale(1)
     setOffset({ x: 0, y: 0 })
   }, [])
@@ -274,14 +285,14 @@ export function Canvas({
       <div className={styles.zoomControls}>
         <button
           className={styles.zoomBtn}
-          onClick={(e) => { e.stopPropagation(); setScale((s) => { const n = clampScale(s - SCALE_STEP); setOffset((o) => o); return n }) }}
+          onClick={(e) => { e.stopPropagation(); handleZoomBtn(-SCALE_STEP) }}
           onPointerDown={(e) => e.stopPropagation()}
           title="縮小"
         >−</button>
         <span className={styles.zoomLabel}>{Math.round(scale * 100)}%</span>
         <button
           className={styles.zoomBtn}
-          onClick={(e) => { e.stopPropagation(); setScale((s) => clampScale(s + SCALE_STEP)) }}
+          onClick={(e) => { e.stopPropagation(); handleZoomBtn(SCALE_STEP) }}
           onPointerDown={(e) => e.stopPropagation()}
           title="拡大"
         >＋</button>
