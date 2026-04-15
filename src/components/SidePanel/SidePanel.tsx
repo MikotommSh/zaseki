@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { Capacitor } from '@capacitor/core'
 import { Share } from '@capacitor/share'
 import type { AppState } from '../../types'
@@ -26,7 +26,21 @@ export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef,
   const [inputName, setInputName] = useState('')
   const [shareMsg, setShareMsg] = useState('')
   const [isExporting, setIsExporting] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // メニュー外タップで閉じる
+  useEffect(() => {
+    if (!isMenuOpen) return
+    const handlePointerDown = (e: PointerEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false)
+      }
+    }
+    document.addEventListener('pointerdown', handlePointerDown)
+    return () => document.removeEventListener('pointerdown', handlePointerDown)
+  }, [isMenuOpen])
 
   const handleAddAttendee = useCallback(() => {
     const name = inputName.trim()
@@ -44,13 +58,14 @@ export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef,
   )
 
   const handleShare = useCallback(async () => {
+    setIsMenuOpen(false)
     const encoded = encodeState(state)
     const shareUrl = `${WEB_BASE_URL}#${encoded}`
     if (Capacitor.isNativePlatform()) {
       try {
         await Share.share({ url: shareUrl, title: '座席表を共有' })
       } catch {
-        // ユーザーがシェートをキャンセルした場合など、何もしない
+        // ユーザーがキャンセルした場合など
       }
     } else {
       try {
@@ -64,6 +79,7 @@ export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef,
   }, [state])
 
   const handleExport = useCallback(async () => {
+    setIsMenuOpen(false)
     if (!canvasRef.current || !innerRef.current || isExporting) return
     setIsExporting(true)
     try {
@@ -99,8 +115,45 @@ export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef,
           <span>/</span>
           <span>{state.seats.length}席</span>
         </div>
-        <button className={styles.helpIcon} onClick={onShowOnboarding} title="使い方">?</button>
+
+        {/* ハンバーガーメニュー */}
+        <div ref={menuRef} className={styles.menuWrapper}>
+          <button
+            className={styles.menuBtn}
+            onClick={() => setIsMenuOpen((v) => !v)}
+            title="メニュー"
+          >
+            ☰
+          </button>
+          {isMenuOpen && (
+            <div className={styles.menuDropdown}>
+              <button
+                className={styles.menuItem}
+                onClick={handleExport}
+                disabled={isExporting || state.seats.length === 0}
+              >
+                🖼 書き出し
+              </button>
+              <button
+                className={styles.menuItem}
+                onClick={handleShare}
+                disabled={state.seats.length === 0 && state.attendees.length === 0}
+              >
+                🔗 共有
+              </button>
+              <div className={styles.menuDivider} />
+              <button
+                className={styles.menuItem}
+                onClick={() => { setIsMenuOpen(false); onShowOnboarding() }}
+              >
+                ❓ 使い方
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+
+      {shareMsg && <p className={styles.shareMsg}>{shareMsg}</p>}
 
       {/* 選択中の座席ヒント */}
       {selectedSeat && (
@@ -174,7 +227,7 @@ export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef,
         )}
       </div>
 
-      {/* アクションボタン */}
+      {/* 席決めボタン */}
       <div className={styles.actions}>
         <button
           className={[styles.btn, styles.shuffleBtn].join(' ')}
@@ -184,23 +237,7 @@ export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef,
         >
           🔀 席決め
         </button>
-        <button
-          className={[styles.btn, styles.exportBtn].join(' ')}
-          onClick={handleExport}
-          disabled={isExporting || state.seats.length === 0}
-        >
-          {isExporting ? '...' : '🖼 書き出し'}
-        </button>
-        <button
-          className={[styles.btn, styles.shareBtn].join(' ')}
-          onClick={handleShare}
-          disabled={state.seats.length === 0 && state.attendees.length === 0}
-        >
-          🔗 共有
-        </button>
-        {shareMsg && <p className={styles.shareMsg}>{shareMsg}</p>}
       </div>
-
     </aside>
   )
 }

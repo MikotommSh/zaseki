@@ -31,27 +31,72 @@
   flex: 1;
 }
 
-.helpIcon {
-  width: 24px;
-  height: 24px;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 50%;
+/* ハンバーガーメニュー */
+.menuWrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.menuBtn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 6px;
   background: transparent;
-  color: #94a3b8;
-  font-size: 13px;
-  font-weight: 700;
+  color: #64748b;
+  font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background 0.15s;
 }
 
-.helpIcon:hover {
+.menuBtn:hover {
   background: #f1f5f9;
-  color: #475569;
-  border-color: #94a3b8;
+}
+
+.menuDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  min-width: 160px;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: #1e293b;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.menuItem:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.menuItem:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.menuDivider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 2px 0;
 }
 
 /* 選択中ヒント */
@@ -249,6 +294,7 @@
   gap: 6px;
 }
 
+
 .btn {
   width: 100%;
   padding: 8px 10px;
@@ -272,24 +318,6 @@
 
 .shuffleBtn:hover:not(:disabled) {
   background: #2563eb;
-}
-
-.exportBtn {
-  background: #e2e8f0;
-  color: #334155;
-}
-
-.exportBtn:hover:not(:disabled) {
-  background: #cbd5e1;
-}
-
-.shareBtn {
-  background: #e2e8f0;
-  color: #334155;
-}
-
-.shareBtn:hover:not(:disabled) {
-  background: #cbd5e1;
 }
 
 .shareMsg {
@@ -333,7 +361,7 @@
   }
 
   .btn {
-    padding: 14px 10px;
-    font-size: 15px;
+    padding: 8px;
+    font-size: 14px;
   }
 }
