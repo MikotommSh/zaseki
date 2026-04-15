@@ -99,6 +99,7 @@ export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef,
           <span>/</span>
           <span>{state.seats.length}席</span>
         </div>
+        <button className={styles.helpIcon} onClick={onShowOnboarding} title="使い方">?</button>
       </div>
 
       {/* 選択中の座席ヒント */}
@@ -200,11 +201,6 @@ export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef,
         {shareMsg && <p className={styles.shareMsg}>{shareMsg}</p>}
       </div>
 
-      <div className={styles.footer}>
-        <button className={styles.helpBtn} onClick={onShowOnboarding}>
-          使い方を見る
-        </button>
-      </div>
     </aside>
   )
 }

@@ -28,6 +28,30 @@
   color: #94a3b8;
   display: flex;
   gap: 3px;
+  flex: 1;
+}
+
+.helpIcon {
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 50%;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.helpIcon:hover {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #94a3b8;
 }
 
 /* 選択中ヒント */
@@ -273,38 +297,6 @@
   color: #16a34a;
   text-align: center;
   margin: 0;
-}
-
-/* フッター */
-.footer {
-  padding: 8px 12px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.footer p {
-  font-size: 10px;
-  color: #94a3b8;
-  margin: 2px 0;
-}
-
-/* 使い方ボタン */
-.helpBtn {
-  display: block;
-  width: 100%;
-  margin-top: 8px;
-  padding: 6px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  background: transparent;
-  color: #94a3b8;
-  font-size: 11px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-
-.helpBtn:hover {
-  background: #f1f5f9;
-  color: #475569;
 }
 
 /* モバイル対応 */
