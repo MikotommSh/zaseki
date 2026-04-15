@@ -109,8 +109,7 @@ export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef,
   return (
     <aside className={styles.panel}>
       <div className={styles.header}>
-        <h1 className={styles.title}>座席</h1>
-        <div className={styles.stats}>
+<div className={styles.stats}>
           <span>{state.attendees.length}人</span>
           <span>/</span>
           <span>{state.seats.length}席</span>
