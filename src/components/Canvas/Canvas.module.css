@@ -37,52 +37,6 @@
   letter-spacing: 0.02em;
 }
 
-/* ズームコントロール */
-.zoomControls {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  z-index: 30;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 4px 6px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-}
-
-.zoomBtn {
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: 5px;
-  background: #f1f5f9;
-  color: #475569;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  transition: background 0.1s;
-  touch-action: manipulation;
-}
-
-.zoomBtn:hover {
-  background: #e2e8f0;
-}
-
-.zoomLabel {
-  font-size: 12px;
-  color: #64748b;
-  min-width: 36px;
-  text-align: center;
-  font-weight: 600;
-  user-select: none;
-}
 
 /* オブジェクト配置フローティングボタン */
 .placingBtn {
@@ -138,16 +92,6 @@
 }
 
 @media (max-width: 640px) {
-  .zoomBtn {
-    width: 36px;
-    height: 36px;
-    font-size: 20px;
-  }
-
-  .zoomLabel {
-    font-size: 13px;
-  }
-
   .placingBtnInner {
     font-size: 15px;
     padding: 8px 14px;

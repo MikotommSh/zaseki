@@ -190,20 +190,6 @@ export function Canvas({
     [actions, canvasRef, isPlacingLandmark, onLandmarkPlaced, onSelectSeat]
   )
 
-  // ── +/- ボタン：キャンバス中央を anchor ─────────────────────────
-  const handleZoomBtn = useCallback((delta: number) => {
-    const rect = canvasRef.current!.getBoundingClientRect()
-    applyZoom(scaleRef.current + delta, rect.width / 2, rect.height / 2)
-  }, [applyZoom, canvasRef])
-
-  const handleReset = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-    scaleRef.current = 1
-    offsetRef.current = { x: 0, y: 0 }
-    setScale(1)
-    setOffset({ x: 0, y: 0 })
-  }, [])
-
   const isEmpty = state.seats.length === 0 && (state.landmarks ?? []).length === 0
 
   return (
@@ -284,29 +270,6 @@ export function Canvas({
         )}
       </div>
 
-      {/* ズームコントロール */}
-      <div className={styles.zoomControls}>
-        <button
-          className={styles.zoomBtn}
-          onClick={(e) => { e.stopPropagation(); handleZoomBtn(-SCALE_STEP) }}
-          onPointerDown={(e) => e.stopPropagation()}
-          title="縮小"
-        >−</button>
-        <span className={styles.zoomLabel}>{Math.round(scale * 100)}%</span>
-        <button
-          className={styles.zoomBtn}
-          onClick={(e) => { e.stopPropagation(); handleZoomBtn(SCALE_STEP) }}
-          onPointerDown={(e) => e.stopPropagation()}
-          title="拡大"
-        >＋</button>
-        <button
-          className={styles.zoomBtn}
-          onClick={handleReset}
-          onPointerDown={(e) => e.stopPropagation()}
-          title="リセット"
-          style={{ fontSize: '14px' }}
-        >↺</button>
-      </div>
     </div>
   )
 }
