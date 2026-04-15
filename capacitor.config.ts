@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'io.github.mikotommsh.zaseki',
-  appName: '座席',
+  appName: '席決め',
   webDir: 'dist',
 };
 
