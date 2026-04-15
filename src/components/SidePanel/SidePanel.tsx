@@ -201,12 +201,6 @@ export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef,
       </div>
 
       <div className={styles.footer}>
-        {/* デスクトップ（マウス）向け */}
-        <p className={styles.footerDesktop}>ダブルクリック: ラベル編集</p>
-        <p className={styles.footerDesktop}>右クリック: 削除</p>
-        {/* タッチデバイス（スマホ・タブレット）向け */}
-        <p className={styles.footerMobile}>ダブルタップ: ラベル編集</p>
-        <p className={styles.footerMobile}>タップ → ✕: 削除</p>
         <button className={styles.helpBtn} onClick={onShowOnboarding}>
           使い方を見る
         </button>

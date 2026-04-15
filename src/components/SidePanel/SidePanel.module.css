@@ -307,16 +307,6 @@
   color: #475569;
 }
 
-/* デスクトップ（マウス）: desktop テキストを表示、mobile テキストを非表示 */
-.footerDesktop { display: block; }
-.footerMobile  { display: none; }
-
-/* タッチデバイス（スマホ・タブレット）: 逆転 */
-@media (pointer: coarse) {
-  .footerDesktop { display: none; }
-  .footerMobile  { display: block; }
-}
-
 /* モバイル対応 */
 @media (max-width: 640px) {
   .panel {
