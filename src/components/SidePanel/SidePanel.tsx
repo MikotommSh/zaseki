@@ -60,16 +60,19 @@ export function SidePanel({ state, actions, selectedSeatId, canvasRef, innerRef,
   const handleShare = useCallback(async () => {
     setIsMenuOpen(false)
     const encoded = encodeState(state)
-    const shareUrl = `${WEB_BASE_URL}#${encoded}`
     if (Capacitor.isNativePlatform()) {
+      // ネイティブ: zaseki:// スキームで直接アプリが開く URL を共有
+      const deepLinkUrl = `zaseki://open#${encoded}`
       try {
-        await Share.share({ url: shareUrl, title: '座席表を共有' })
+        await Share.share({ url: deepLinkUrl, title: '席決めで開く' })
       } catch {
         // ユーザーがキャンセルした場合など
       }
     } else {
+      // Web: GitHub Pages URL をクリップボードにコピー
+      const webUrl = `${WEB_BASE_URL}#${encoded}`
       try {
-        await navigator.clipboard.writeText(shareUrl)
+        await navigator.clipboard.writeText(webUrl)
         setShareMsg('URLをコピーしました！')
       } catch {
         setShareMsg('URLのコピーに失敗しました')
