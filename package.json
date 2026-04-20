@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "deploy": "GITHUB_PAGES=true npm run build && gh-pages -d dist",
+    "deploy": "GITHUB_PAGES=true npm run build && gh-pages -d dist -r https://github.com/MikotommSh/zaseki.git",
     "ios:build": "npm run build && npx cap sync ios",
     "ios:open": "npx cap open ios"
   },
