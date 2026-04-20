@@ -3,6 +3,11 @@ dist/
 .DS_Store
 *.local
 
+# 環境変数（APIキー・課金キーなど）
+.env
+.env.production
+.env.development
+
 # Playwright
 /test-results/
 /playwright-report/
